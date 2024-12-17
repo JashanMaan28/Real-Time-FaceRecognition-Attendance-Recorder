@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>CSV Viewer</h1>
+        <table id="csv-table">
+            <thead>
+                <tr id="table-header">
+                    <!-- Dynamically populated -->
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Dynamically populated -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Function to fetch and update table data
+        async function fetchTableData() {
+            try {
+                const response = await fetch('/data');
+                const data = await response.json();
+
+                const tableHeader = document.getElementById('table-header');
+                const tableBody = document.getElementById('table-body');
+
+                // Clear existing table contents
+                tableHeader.innerHTML = '';
+                tableBody.innerHTML = '';
+
+                if (data.length > 0) {
+                    // Populate header row
+                    const keys = Object.keys(data[0]);
+                    keys.forEach(key => {
+                        const th = document.createElement('th');
+                        th.textContent = key;
+                        tableHeader.appendChild(th);
+                    });
+
+                    // Populate rows
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        keys.forEach(key => {
+                            const td = document.createElement('td');
+                            td.textContent = row[key];
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    // Show message if no data
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.textContent = 'No data available';
+                    td.colSpan = '100%';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    tableBody.appendChild(tr);
+                }
+            } catch (error) {
+                console.error('Error fetching table data:', error);
+            }
+        }
+
+        // Fetch data every 5 seconds
+        setInterval(fetchTableData, 3000);
+        fetchTableData(); // Initial fetch
+    </script>
+</body>
+</html>
